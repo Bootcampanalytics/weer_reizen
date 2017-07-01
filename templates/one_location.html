@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Weer reizen</title>
+  <style>
+		div.container {
+		    width: 100%;
+		    border: 1px solid gray;
+		}
+		
+		header, footer {
+		    padding: 1em;
+		    color: white;
+		    background-color: black;
+		    clear: left;
+		    text-align: center;
+		}
+		main {
+		    margin-left: 170px;
+		    border-left: 1px solid gray;
+		    padding: 1em;
+		    overflow: hidden;
+		}
+</style>
+<body>
+	<header> 
+		<h1>Weer reizen</h1>
+	</header>
+<main>
+	<form action="/one_location/" method ="POST">
+		Location: <input type="text" size=40 name="location" value="set location">
+		<input type = "submit" value="Lookup weather">
+	</form>	
+<p>
+{{ result|safe }} 
+
+<p>
+<p>
+<table>
+<tr><td>	clds	</td><td>	Daytime average cloud cover expressed as a percentage	</td></tr>
+<tr><td>	daypart_name	</td><td>	The name of a 12-hour day part not including day names in the first 48 hours	</td></tr>
+<tr><td>	dow	</td><td>	Day of week	</td></tr>
+<tr><td>	expire_time_gmt	</td><td>	Expiration time in UNIX seconds	</td></tr>
+<tr><td>	fcst_valid	</td><td>	Time forecast is valid in UNIX seconds	</td></tr>
+<tr><td>	fcst_valid_local	</td><td>	Time forecast is valid in local apparent time	</td></tr>
+<tr><td>	icon_code	</td><td>	This number is the key to the weather icon lookup.	</td></tr>
+<tr><td>	icon_extd	</td><td>	Code representing explicit full set sensible weather	</td></tr>
+<tr><td>	num	</td><td>	The sequential number that identifies each of the forecasted days in the API	</td></tr>
+<tr><td>	phrase_12char	</td><td>	Daytime sensible weather phrase	</td></tr>
+<tr><td>	phrase_22char	</td><td>	Daytime sensible weather phrase	</td></tr>
+<tr><td>	phrase_32char	</td><td>	Daytime sensible weather phrase	</td></tr>
+<tr><td>	pop	</td><td>	Daytime probability of precipitation phrase	</td></tr>
+<tr><td>	precip_type	</td><td>	Type of precipitation (rain/snow) - combine with prob	</td></tr>
+<tr><td>	qualifier	</td><td>	A forecast qualifier that is applicable to the 12-hour forecast period	</td></tr>
+<tr><td>	qualifier_code	</td><td>	A code for the forecast qualifier applicable to the 12-hour	</td></tr>
+<tr><td>	rh	</td><td>	The daytime relative humidity of the air	</td></tr>
+<tr><td>	subphrase_pt1	</td><td>	Part 1 of 3-part daytime sensible weather phrase	</td></tr>
+<tr><td>	subphrase_pt2	</td><td>	Part 2 of 3-part daytime sensible weather phrase	</td></tr>
+<tr><td>	subphrase_pt3	</td><td>	Part 3 of 3-part daytime sensible weather phrase	</td></tr>
+<tr><td>	temp	</td><td>	The forecasted temperature for midpoint day (1pm) or midpoint night (1am) for a 12-hour	</td></tr>
+<tr><td>	wdir	</td><td>	Daytime average wind direction in magnetic notation	</td></tr>
+<tr><td>	wdir_cardinal	</td><td>	Daytime average wind direction in cardinal notation (N-NE, etc)	</td></tr>
+<tr><td>	wspd	</td><td>	The maximum forecasted daytime wind speed	</td></tr>
+
+</table>
+
+</main>
+<footer> Powered by Olav</footer>
+</body>
+</html>

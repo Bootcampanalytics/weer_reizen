@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Weer reizen</title>
+  <style>
+  		table, th, td {
+   border: 1px solid black;
+	}	
+		div.container {
+		    width: 100%;
+		    border: 1px solid gray;
+		}
+		
+		header, footer {
+		    padding: 1em;
+		    color: white;
+		    background-color: black;
+		    clear: left;
+		    text-align: center;
+		}
+		main {
+		    margin-left: 170px;
+		    border-left: 1px solid gray;
+		    padding: 1em;
+		    overflow: hidden;
+		}
+	
+</style>
+<body>
+	<header> 
+		<h1>Weer reizen</h1>
+	</header>
+<main>
+
+	<form action="/" method ="POST">
+<table style="width:100%">	<tr><td width="33%">
+		Days: 
+		<p>
+		<input type="checkbox" name="days" value="Saturday">Saturday<br>
+		<input type="checkbox" name="days" value="Sunday">Sunday<br>
+		<input type="checkbox" name="days" value="Monday">Monday<br>
+		<input type="checkbox" name="days" value="Tuesday">Tuesday<br>
+		<input type="checkbox" name="days" value="Wednesday">Wednesday<br>
+		<input type="checkbox" name="days" value="Thursday">Thursday<br>
+		<input type="checkbox" name="days" value="Friday">Friday<br>
+		<input type="checkbox" name="days" value="Saturday+1">Saturday+1<br>
+		<input type="checkbox" name="days" value="Sunday+1">Sunday+1<br>
+		<input type="checkbox" name="days" value="Monday+1">Monday+1<br>
+		<input type="checkbox" name="days" value="Tuesday+1">Tuesday+1<br>
+		<input type="checkbox" name="days" value="Wednesday+1">Wednesday+1<br>
+		<input type="checkbox" name="days" value="Thursday+1">Thursday+1<br>
+		<input type="checkbox" name="days" value="Friday+1">Friday+1<br>		
+		</td>
+		<td  width="33%">
+		Time:
+		<p>
+		<input type="checkbox" name="time" value="Morning" checked>Morning<br>
+		<input type="checkbox" name="time" value="Afternoon" checked>Afternoon<br>
+		<input type="checkbox" name="time" value="Evening" checked>Evening<br>
+		<input type="checkbox" name="time" value="Overnight">Overnight<br
+		</td>
+		<td  width="34%">
+		<input type="checkbox" name="locatie" value="Drenthe" checked>Drenthe<br>
+		<input type="checkbox" name="locatie" value="Flevoland" checked>Flevoland<br>
+		<input type="checkbox" name="locatie" value="Friesland" checked>Friesland<br>
+		<input type="checkbox" name="locatie" value="Gelderland" checked>Gelderland<br>
+		<input type="checkbox" name="locatie" value="Groningen" checked>Groningen<br>
+		<input type="checkbox" name="locatie" value="Limburg" checked>Limburg<br>
+		<input type="checkbox" name="locatie" value="Noord-Brabant" checked>Noord-Brabant<br>
+		<input type="checkbox" name="locatie" value="Noord-Holland" checked>Noord-Holland<br>
+		<input type="checkbox" name="locatie" value="Overijssel" checked>Overijssel<br>
+		<input type="checkbox" name="locatie" value="Utrecht" checked>Utrecht<br>
+		<input type="checkbox" name="locatie" value="Zeeland" checked>Zeeland<br>
+		<input type="checkbox" name="locatie" value="Zuid-Holland" checked>Zuid-Holland<br>	
+		</td>
+		</tr>
+</table>		
+		<input type = "submit" value="best_location">
+	</form>	
+
+<p>
+Locaties met minste bewolking
+<table>
+<tr><th>Gemeente</th><th>% bewolking</th>
+  {% for res in result1 %}
+	  <tr>
+	  {% for res1 in res %}
+	  <td>{{ res1|safe }}</td>
+	  {% endfor %}
+	  </tr>
+  {% endfor %}
+</table>
+<p><p>
+Locaties met minste regen
+<table>
+<tr><th>Gemeente</th><th>%kans op regen</th>
+  {% for res in result2 %}
+	  <tr>
+	  {% for res1 in res %}
+	  <td>{{ res1|safe }}</td>
+	  {% endfor %}
+	  </tr>
+  {% endfor %}
+</table>
+<p><p>
+Locaties met hoogste temperatuur
+<table>
+<tr><th>Gemeente</th><th>temperatuur</th>
+  {% for res in result3 %}
+	  <tr>
+	  {% for res1 in res %}
+	  <td>{{ res1|safe }}</td>
+	  {% endfor %}
+	  </tr>
+  {% endfor %}
+</table>
+<p><p>
+Locaties met minste wind
+<table>
+<tr><th>Gemeente</th><th>wind sterkte</th>
+  {% for res in result4 %}
+	  <tr>
+	  {% for res1 in res %}
+	  <td>{{ res1|safe }}</td>
+	  {% endfor %}
+	  </tr>
+  {% endfor %}
+</table>
+
+<p>
+
+</main>
+<footer> Powered by Olav</footer>
+</body>
+</html>
