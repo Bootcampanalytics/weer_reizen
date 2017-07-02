@@ -1,4 +1,5 @@
 import ibm_db
+import pandas as pd
 from time import gmtime, strftime
 
 credentials_1={"host": "dashdb-entry-yp-lon02-01.services.eu-gb.bluemix.net","username": "dash8371" ,"password": "5tJ__CuJf2Li"}
