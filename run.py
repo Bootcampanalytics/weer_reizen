@@ -13,7 +13,7 @@ app = Flask(__name__)
 @app.route('/one_location/', methods = ['GET', 'POST'])
 def serve_page():
 	if request.method == 'GET':
-		result=""
+		result=" "
 		return render_template('one_location.html',result=result)
 	if request.method == 'POST':
 		loc = request.values.get('location')
@@ -134,7 +134,7 @@ def serve_page_main():
 		
 		return render_template('index.html',result1=result1,result2=result2,result3=result3,result4=result4)
 		
-
+ 
 port = os.getenv('PORT', '5000')
 if __name__ == "__main__":
 	app.debug = True
