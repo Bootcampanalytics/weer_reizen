@@ -25,89 +25,49 @@ def serve_page():
 		result=json2html.convert(json.loads(requests.get(url+query).text))    
 		return render_template('one_location.html',result=result)
 
-@app.route('/collect_weather/', methods = ['GET', 'POST'])
-def serve_page1():
-	if request.method == 'GET':
-		last_refresh=""
-		return render_template('collect_weather.html',last_refresh=last_refresh)
-	if request.method == 'POST':
-		credentials_1={"host": "dashdb-entry-yp-lon02-01.services.eu-gb.bluemix.net","username": "dash8371" ,"password": "5tJ__CuJf2Li"}
-		db2conn = ibm_db.connect("database=BLUDB;Hostname=" + credentials_1["host"] + ";Port=50000;PROTOCOL=TCPIP;UID=" + credentials_1["username"] + ";PWD=" + credentials_1["password"]+";","","")
-		stmt = ibm_db.exec_immediate(db2conn,"TRUNCATE TABLE WEERDATA IMMEDIATE")
-		
-		locations = pd.DataFrame(columns=('GEMEENTE','PROVINCIE','LATITUDE','LONGITUDE','PC_COUNT'))
-		stmt = ibm_db.exec_immediate(db2conn,"select * from LOCATIONS")
-		result = ibm_db.fetch_assoc(stmt)
-		
-		row = ibm_db.fetch_tuple(stmt)
-		while row != False:
-		    locations.loc[len(locations)]=row
-		    row = ibm_db.fetch_tuple(stmt)
-		
-		#locations=locations[:9]
-		
-		url='https://59760dd6-a040-4632-9482-0a822d6ca56b:R6E0gH4ydU@twcservice.eu-gb.mybluemix.net:443/api/weather'
-		weather = pd.DataFrame(columns=('GEMEENTE','PROVINCIE','DAY_OF_WEEK', 'DAYPART_NAME', 'CLOUDPERC','RAINPROB','HUMIDITY','TEMP','WINDDIREC','WINDSPEED'))
-		
-		for index, row in locations.iterrows():
-		    query='/v1/geocode/'+str(row['LATITUDE'])+'/'+str(row['LONGITUDE'])+'/forecast/intraday/10day.json?units=m'
-		    result=json.loads(requests.get(url+query).text)
-		    #time.sleep(1)
-		    day1=result['forecasts'][0]['dow']
-		    next_week=False
-		    len_weather=len(weather)
-		    for i in range(len(result['forecasts'])):
-		        if (i>20 and result['forecasts'][i]['dow']==day1) or next_week:
-		            dow=result['forecasts'][i]['dow']+'+1'
-		            next_week=True
-		        else:
-		            dow=result['forecasts'][i]['dow']
-		
-		        weather.loc[i+len_weather]=[row['GEMEENTE'],
-		                                    row['PROVINCIE'],
-		                                    dow,
-		                                    result['forecasts'][i]['daypart_name'],
-		                                    result['forecasts'][i]['clds'],
-		                                    result['forecasts'][i]['pop'],
-		                                    result['forecasts'][i]['rh'],
-		                                    result['forecasts'][i]['temp'],
-		                                    result['forecasts'][i]['wdir_cardinal'],
-		                                    result['forecasts'][i]['wspd']]
-		          
-		for index, row in weather.iterrows():
-		    stmt = ibm_db.exec_immediate(db2conn,"INSERT INTO WEERDATA  VALUES ('"+ row[0]+"','"+ row[1]+"','"+row[2]+"','"+row[3]+"',"+str(row[4])+","+str(row[5])+","+str(row[6])+","+str(row[7])+",'"+row[8]+"',"+str(row[9])+")")
-		ibm_db.close(db2conn)
-		last_refresh='now'
-		return render_template('collect_weather.html',last_refresh=last_refresh)
 
 @app.route('/', methods = ['GET', 'POST'])
-
 def serve_page_main():
+
+	credentials_1={"host": "dashdb-entry-yp-lon02-01.services.eu-gb.bluemix.net","username": "dash8371" ,"password": "5tJ__CuJf2Li"}
+	db2conn = ibm_db.connect("database=BLUDB;Hostname=" + credentials_1["host"] + ";Port=50000;PROTOCOL=TCPIP;UID=" + credentials_1["username"] + ";PWD=" + credentials_1["password"]+";","","")
+
+	query = 'SELECT MAX(T0."index") AS "index_Max" FROM DASH8371.COUNTER T0'
+	stmt = ibm_db.exec_immediate(db2conn,query)
+	latest = ibm_db.fetch_tuple(stmt)[0]
+	
+	query='SELECT T0."DAY_OF_WEEK" AS "DAY_OF_WEEK",AVG(CAST(T0.NUM AS FLOAT)) AS "NUM_Mean" FROM DASH8371."WEERDATA_V3" T0 WHERE (T0.LATEST ='+str(latest)+') GROUP BY T0."DAY_OF_WEEK"  ORDER BY 2 ASC'
+	stmt = ibm_db.exec_immediate(db2conn,query)
+	days_list=[]
+	row = ibm_db.fetch_tuple(stmt)
+	while row != False:
+	   days_list.append(row[0]) 
+	   row = ibm_db.fetch_tuple(stmt)  	   
+		   
 	if request.method == 'GET':
+	
 		result1=""
 		result2=""
 		result3=""
 		result4=""
-		return render_template('index.html',result1=result1,result2=result2,result3=result3,result4=result4)
+		return render_template('index.html',days=days_list,result1=result1,result2=result2,result3=result3,result4=result4)
+		
 	if request.method == 'POST':	
 		days = request.form.getlist('days') 
 		time = request.form.getlist('time') 
 		location = request.form.getlist('locatie')
-		
-		credentials_1={"host": "dashdb-entry-yp-lon02-01.services.eu-gb.bluemix.net","username": "dash8371" ,"password": "5tJ__CuJf2Li"}
-		db2conn = ibm_db.connect("database=BLUDB;Hostname=" + credentials_1["host"] + ";Port=50000;PROTOCOL=TCPIP;UID=" + credentials_1["username"] + ";PWD=" + credentials_1["password"]+";","","")
-		
-		query1 ='SELECT T0.GEMEENTE AS "GEMEENTE",AVG(T0.CLOUDPERC) AS "CLOUD PERCENTAGE" FROM DASH8371.WEERDATA T0 WHERE ((T0."DAY_OF_WEEK" IN (' + ', '.join("'{0}'".format(d) for d in days) + ')) AND (T0."DAYPART_NAME" IN (' + ', '.join("'{0}'".format(t) for t in time) +' )) AND (T0."PROVINCIE" IN (' + ', '.join("'{0}'".format(l) for l in location) +' ))) GROUP BY T0.GEMEENTE ORDER BY 2 ASC FETCH FIRST 3 ROWS ONLY'
-		query2 ='SELECT T0.GEMEENTE AS "GEMEENTE",AVG(T0.RAINPROB) AS "RAINPROB" FROM DASH8371.WEERDATA T0 WHERE ((T0."DAY_OF_WEEK" IN (' + ', '.join("'{0}'".format(d) for d in days) + ')) AND (T0."DAYPART_NAME" IN (' + ', '.join("'{0}'".format(t) for t in time) +' )) AND (T0."PROVINCIE" IN (' + ', '.join("'{0}'".format(l) for l in location) +' ))) GROUP BY T0.GEMEENTE ORDER BY 2 ASC FETCH FIRST 3 ROWS ONLY'
-		query3 ='SELECT T0.GEMEENTE AS "GEMEENTE",AVG(T0.TEMP) AS "TEMP" FROM DASH8371.WEERDATA T0 WHERE ((T0."DAY_OF_WEEK" IN (' + ', '.join("'{0}'".format(d) for d in days) + ')) AND (T0."DAYPART_NAME" IN (' + ', '.join("'{0}'".format(t) for t in time) +' )) AND (T0."PROVINCIE" IN (' + ', '.join("'{0}'".format(l) for l in location) +' ))) GROUP BY T0.GEMEENTE ORDER BY 2 DESC FETCH FIRST 3 ROWS ONLY'
-		query4 ='SELECT T0.GEMEENTE AS "GEMEENTE",AVG(T0.WINDSPEED) AS "WINDSPEED" FROM DASH8371.WEERDATA T0 WHERE ((T0."DAY_OF_WEEK" IN (' + ', '.join("'{0}'".format(d) for d in days) + ')) AND (T0."DAYPART_NAME" IN (' + ', '.join("'{0}'".format(t) for t in time) +' )) AND (T0."PROVINCIE" IN (' + ', '.join("'{0}'".format(l) for l in location) +' ))) GROUP BY T0.GEMEENTE ORDER BY 2 ASC FETCH FIRST 3 ROWS ONLY'
+			
+		query1 ='''SELECT T0.GEMEENTE AS "GEMEENTE",CAST(DECIMAL(AVG(T0.CLOUDPERC),2,0) AS CHAR(2)) CONCAT '%' AS "CLOUD PERCENTAGE" FROM DASH8371.WEERDATA_V3 T0 WHERE ((T0."LATEST"='''+str(latest)+') AND (T0."DAY_OF_WEEK" IN (' + ', '.join("'{0}'".format(d) for d in days) + ')) AND (T0."DAYPART_NAME" IN (' + ', '.join("'{0}'".format(t) for t in time) +' )) AND (T0."PROVINCIE" IN (' + ', '.join("'{0}'".format(l) for l in location) +' ))) GROUP BY T0.GEMEENTE ORDER BY 2 ASC FETCH FIRST 3 ROWS ONLY'
+		query2 ='''SELECT T0.GEMEENTE AS "GEMEENTE",CAST(DECIMAL(AVG(T0.RAINPROB),2,0) AS CHAR(2)) CONCAT '%' AS "RAINPROB" FROM DASH8371.WEERDATA_V3 T0 WHERE ((T0.LATEST='''+str(latest)+') AND (T0."DAY_OF_WEEK" IN (' + ', '.join("'{0}'".format(d) for d in days) + ')) AND (T0."DAYPART_NAME" IN (' + ', '.join("'{0}'".format(t) for t in time) +' )) AND (T0."PROVINCIE" IN (' + ', '.join("'{0}'".format(l) for l in location) +' ))) GROUP BY T0.GEMEENTE ORDER BY 2 ASC FETCH FIRST 3 ROWS ONLY'
+		query3 ='''SELECT T0.GEMEENTE AS "GEMEENTE",CAST(DECIMAL(AVG(T0.TEMP),2,0) AS CHAR(2)) CONCAT 'C' AS "TEMP" FROM DASH8371.WEERDATA_V3 T0 WHERE ((''' +str(latest)+') AND (T0."DAY_OF_WEEK" IN (' + ', '.join("'{0}'".format(d) for d in days) + ')) AND (T0."DAYPART_NAME" IN (' + ', '.join("'{0}'".format(t) for t in time) +' )) AND (T0."PROVINCIE" IN (' + ', '.join("'{0}'".format(l) for l in location) +' ))) GROUP BY T0.GEMEENTE ORDER BY 2 DESC FETCH FIRST 3 ROWS ONLY'
+		query4 ='SELECT T0.GEMEENTE AS "GEMEENTE",DECIMAL((((((-8.9e-04 * POWER(DOUBLE(AVG(T0.WINDSPEED)) / NULLIF(10, 0), 4)) + (2.64e-02 * POWER(DOUBLE(AVG(T0.WINDSPEED)) / NULLIF(10, 0), 3))) - (2.942e-01 * POWER(DOUBLE(AVG(T0.WINDSPEED)) / NULLIF(10, 0), 2))) + (2.194e+00 * (DOUBLE(AVG(T0.WINDSPEED)) / NULLIF(10, 0)))) + 1.6639e-01),2,1) AS "WINDSPEED" FROM DASH8371.WEERDATA_V3 T0 WHERE ((T0.LATEST='+str(latest)+') AND (T0."DAY_OF_WEEK" IN (' + ', '.join("'{0}'".format(d) for d in days) + ')) AND (T0."DAYPART_NAME" IN (' + ', '.join("'{0}'".format(t) for t in time) +' )) AND (T0."PROVINCIE" IN (' + ', '.join("'{0}'".format(l) for l in location) +' ))) GROUP BY T0.GEMEENTE ORDER BY 2 ASC FETCH FIRST 3 ROWS ONLY'
 				
 		stmt = ibm_db.exec_immediate(db2conn,query1)
 		result1=[]
 		row = ibm_db.fetch_tuple(stmt)
 		while row != False:
 		   result1.append(row)
-		   row = ibm_db.fetch_tuple(stmt)
+		   row = ibm_db.fetch_tuple(stmt)     
 
 		stmt = ibm_db.exec_immediate(db2conn,query2)
 		result2=[]
@@ -132,7 +92,7 @@ def serve_page_main():
 			
 		ibm_db.close(db2conn)
 		
-		return render_template('index.html',result1=result1,result2=result2,result3=result3,result4=result4)
+		return render_template('index.html',days=days_list,result1=result1,result2=result2,result3=result3,result4=result4)
 		
  
 port = os.getenv('PORT', '5000')

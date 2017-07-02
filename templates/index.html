@@ -37,20 +37,9 @@
 <table style="width:100%">	<tr><td width="33%">
 		Days: 
 		<p>
-		<input type="checkbox" name="days" value="Saturday">Saturday<br>
-		<input type="checkbox" name="days" value="Sunday">Sunday<br>
-		<input type="checkbox" name="days" value="Monday">Monday<br>
-		<input type="checkbox" name="days" value="Tuesday">Tuesday<br>
-		<input type="checkbox" name="days" value="Wednesday">Wednesday<br>
-		<input type="checkbox" name="days" value="Thursday">Thursday<br>
-		<input type="checkbox" name="days" value="Friday">Friday<br>
-		<input type="checkbox" name="days" value="Saturday+1">Saturday+1<br>
-		<input type="checkbox" name="days" value="Sunday+1">Sunday+1<br>
-		<input type="checkbox" name="days" value="Monday+1">Monday+1<br>
-		<input type="checkbox" name="days" value="Tuesday+1">Tuesday+1<br>
-		<input type="checkbox" name="days" value="Wednesday+1">Wednesday+1<br>
-		<input type="checkbox" name="days" value="Thursday+1">Thursday+1<br>
-		<input type="checkbox" name="days" value="Friday+1">Friday+1<br>		
+		{% for d in days %}
+	    <input type="checkbox" name="days" value="{{d|safe}}">{{d|safe}}<br>
+	    {% endfor %}
 		</td>
 		<td  width="33%">
 		Time:
@@ -118,7 +107,7 @@ Locaties met hoogste temperatuur
 <p><p>
 Locaties met minste wind
 <table>
-<tr><th>Gemeente</th><th>wind sterkte</th>
+<tr><th>Gemeente</th><th>wind kracht</th>
   {% for res in result4 %}
 	  <tr>
 	  {% for res1 in res %}
