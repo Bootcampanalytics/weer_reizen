@@ -2,6 +2,7 @@ import ibm_db
 import pandas as pd
 import json
 from time import gmtime, strftime
+import time
 
 credentials_1={"host": "dashdb-entry-yp-lon02-01.services.eu-gb.bluemix.net","username": "dash8371" ,"password": "5tJ__CuJf2Li"}
 db2conn = ibm_db.connect("database=BLUDB;Hostname=" + credentials_1["host"] + ";Port=50000;PROTOCOL=TCPIP;UID=" + credentials_1["username"] + ";PWD=" + credentials_1["password"]+";","","")
