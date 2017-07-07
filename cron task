@@ -9,7 +9,7 @@ db2conn = ibm_db.connect("database=BLUDB;Hostname=" + credentials_1["host"] + ";
 
 query='SELECT MAX(T0."index") AS "index_Max"  FROM DASH8371.COUNTER T0'
 stmt = ibm_db.exec_immediate(db2conn,query)
-latest = ibm_db.fetch_tuple(stmt)[0]
+latest = ibm_db.fetch_tuple(stmt)[0]+1
 
 locations = pd.DataFrame(columns=('GEMEENTE','PROVINCIE','LATITUDE','LONGITUDE','PC_COUNT'))
 stmt = ibm_db.exec_immediate(db2conn,"select * from LOCATIONS_V1")
@@ -52,7 +52,6 @@ for index, row in locations.iterrows():
 for index, row in weather.iterrows():
     stmt = ibm_db.exec_immediate(db2conn,"INSERT INTO WEERDATA_V3  VALUES ("+str(row[0])+",'"+ row[1]+"','"+ row[2]+"','"+row[3]+"','"+row[4]+"',"+str(row[5])+","+str(row[6])+","+str(row[7])+","+str(row[8])+","+str(row[9])+",'"+row[10]+"',"+str(row[11])+")")
 
-latest=latest+1
 stmt = ibm_db.exec_immediate(db2conn,"INSERT INTO COUNTER  VALUES ("+str(latest)+")")
 print strftime("%Y-%m-%d %H:%M:%S", gmtime()),"number:",latest
     
